@@ -25,7 +25,8 @@ Circuit Documenter is an automated web crawler that uses AI to generate document
 
 3.  **Run the crawler:**
     ```bash
-    pnpm crawl
+    pnpm crawl https://your-app.local
+    # => traces/trace-<timestamp>.zip
     ```
 
 4.  **View the documentation:**
