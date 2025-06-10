@@ -3,10 +3,18 @@ import fs from 'fs';
 import { sha1 } from './util/hash.js';
 
 const DB_PATH = 'flows.sqlite';
+let db: Database.Database;
+
 if (!fs.existsSync(DB_PATH)) {
   fs.writeFileSync(DB_PATH, '');
 }
-const db = new Database(DB_PATH);
+db = new Database(DB_PATH);
+
+// Exported for test mocking
+export function __setDb(testDb: Database.Database) {
+  // @ts-ignore
+  db = testDb;
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS paths (
@@ -33,6 +41,17 @@ export interface StepInput {
   screenshot: string;
 }
 
+/**
+ * Inserts or updates a step in the database.
+ *
+ * This function checks if a step at a given path and sequence already exists.
+ * - If it doesn't exist, it inserts a new row.
+ * - If it exists and the DOM hash is different, it updates the hash and screenshot.
+ * - If it exists and the DOM hash is the same, it does nothing.
+ *
+ * @param step The step data to upsert.
+ * @returns 'new' if the step was created, 'changed' if updated, 'same' if unchanged.
+ */
 export function upsertStep(step: StepInput): 'new' | 'changed' | 'same' {
   const hash = sha1(step.dom);
   const row  = db
@@ -63,6 +82,10 @@ export function upsertStep(step: StepInput): 'new' | 'changed' | 'same' {
   return 'same';
 }
 
+/**
+ * Updates the lastSeen timestamp for a given path.
+ * @param pathId The ID of the path to touch.
+ */
 export function touchPath(pathId: string) {
   db.prepare(`UPDATE paths SET lastSeen = datetime('now') WHERE pathId = ?`)
     .run(pathId);
