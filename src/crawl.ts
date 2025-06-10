@@ -1,9 +1,6 @@
-import { chromium } from '@playwright/test';
+import { addStep } from './storage';
+import { getAuthenticatedContext, closeBrowser } from './browser';
 import fs from 'fs';
-import { addStep, init } from './storage';
-import { injectAuth } from './auth';
-
-init();
 
 type CrawlOptions = {
   headless?: boolean;
@@ -11,7 +8,7 @@ type CrawlOptions = {
 
 /**
  * Crawls a single URL, takes a screenshot, and stores it as a step in a flow.
- * It handles authentication and applies any configured URL variants.
+ * It uses the shared, authenticated browser context.
  *
  * @param name The name of the flow.
  * @param url The URL to crawl.
@@ -22,28 +19,23 @@ export async function crawl(
   url: string,
   options?: CrawlOptions,
 ) {
-  const browser = await chromium.launch({ headless: options?.headless });
-  // Pass storageState only if the auth file exists.
-  const context = await browser.newContext({
-    storageState: fs.existsSync('auth.json') ? 'auth.json' : undefined,
-  });
-
-  // injectAuth will log in and create auth.json if it's missing.
-  await injectAuth(context);
-
+  const context = await getAuthenticatedContext(options);
   const page = await context.newPage();
-  const variant = process.env.FORCE_VARIANT || '';
-  const fullUrl = url + variant;
-  await page.goto(fullUrl);
+  try {
+    const variant = process.env.FORCE_VARIANT || '';
+    const fullUrl = url + variant;
+    await page.goto(fullUrl);
 
-  const screenshotsDir = 'screenshots';
-  if (!fs.existsSync(screenshotsDir)) {
-    fs.mkdirSync(screenshotsDir);
+    const screenshotsDir = 'screenshots';
+    if (!fs.existsSync(screenshotsDir)) {
+      fs.mkdirSync(screenshotsDir);
+    }
+    const screenshotPath = `${screenshotsDir}/${name}-${Date.now()}.png`;
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+
+    await addStep(name, { url: fullUrl, screenshot: screenshotPath });
+  } finally {
+    await page.close();
+    await closeBrowser();
   }
-  const screenshotPath = `${screenshotsDir}/${name}-${Date.now()}.png`;
-  await page.screenshot({ path: screenshotPath, fullPage: true });
-
-  await addStep(name, { url: fullUrl, screenshot: screenshotPath });
-
-  await browser.close();
 }

@@ -82,6 +82,14 @@ To clear a saved session and force a new login, run:
 pnpm auth:reset
 ```
 
+### Authenticated crawl
+
+# First time only – headful login, cookies saved
+pnpm crawl $LOGIN_URL --headful
+
+# Subsequent crawls reuse auth.json automatically
+pnpm crawl https://dashboard.razorpay.com --headful
+
 ### Sharded Crawling
 
 For very large websites, you can parallelize the crawling process across multiple machines or containers using Playwright's sharding feature. The `--shard` flag allows you to split the list of URLs to crawl into a number of shards and run only a specific one.

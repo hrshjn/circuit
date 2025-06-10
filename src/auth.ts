@@ -16,8 +16,37 @@ export async function injectAuth(context: BrowserContext) {
     return;
   }
 
-  // Fallback to username/password login from .env
   const { LOGIN_URL, USERNAME, PASSWORD } = process.env;
+
+  // Detect Razorpay login by URL pattern
+  if (LOGIN_URL?.includes('dashboard.razorpay.com/signin')) {
+    const page = await context.newPage();
+    try {
+      await page.goto(LOGIN_URL);
+
+      // Step 1: Fill email/phone and click Continue
+      const emailInput = page.getByPlaceholder('Enter your email or phone number');
+      await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+      await emailInput.fill(USERNAME!);
+      await page.getByRole('button', { name: 'Continue' }).click();
+
+      // Step 2: Fill password and click Sign In
+      const passwordInput = page.locator('input[name="password"]');
+      await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
+      await passwordInput.fill(PASSWORD!);
+
+      // Click the final submit and wait for the dashboard URL to load
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.waitForURL('**/dashboard**', { timeout: 15000 });
+
+      await context.storageState({ path: 'auth.json' });
+    } finally {
+      await page.close();
+    }
+    return;
+  }
+
+  // Fallback to generic username/password login from .env
   if (LOGIN_URL && USERNAME && PASSWORD) {
     const page = await context.newPage();
     try {

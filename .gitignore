@@ -1,6 +1,13 @@
 # Dependencies
-/node_modules
-/dist
+node_modules
+.env
+auth.json
+flows.sqlite
+screenshots/
+docs/flows/
+/traces/
+/dist/
+.DS_Store
 
 # Environment
 .env
@@ -16,7 +23,6 @@ pnpm-debug.log*
 /test-results/
 /playwright-report/
 /playwright/.cache/
-/traces/
 trace-*.zip
 
 # Playwright

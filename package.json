@@ -6,15 +6,16 @@
   "scripts": {
     "start": "pnpm crawl https://razorpay.com --graph --depth=3",
     "dev": "tsx watch src/crawl.ts",
-    "crawl": "tsx bin/run.ts",
+    "crawl": "tsx -r dotenv/config bin/run.ts",
+    "debug:env": "tsx -r dotenv/config -e 'console.log(`LOGIN_URL from env: ${process.env.LOGIN_URL}`)'",
     "build": "tsc -p .",
     "test": "playwright test tests/unit.spec.ts",
     "test:visual": "playwright test tests/visual.spec.ts",
     "test:visual:update": "playwright test tests/visual.spec.ts --update-snapshots",
     "ci:nightly": "pnpm crawl && pnpm docs:regen && pnpm ci:pr",
     "auth:reset": "rm -f auth.json",
-    "docs:regen": "tsx bin/docs-regen.ts --all",
-    "docs:regen:changed": "tsx bin/docs-regen-diff.ts"
+    "docs:regen": "tsx -r dotenv/config bin/docs-regen.ts",
+    "docs:regen:changed": "tsx -r dotenv/config bin/docs-regen-diff.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
