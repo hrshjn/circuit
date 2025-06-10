@@ -26,6 +26,9 @@ importers:
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
+      p-limit:
+        specifier: ^6.2.0
+        version: 6.2.0
       zod:
         specifier: ^3.25.57
         version: 3.25.57
@@ -913,6 +916,10 @@ packages:
     resolution: {integrity: sha512-LICb2p9CB7FS+0eR1oqWnHhp0FljGLZCWBE9aix0Uye9W8LTQPwMTYVGWQWIw9RdQiDg4+epXQODwIYJtSJaow==}
     engines: {node: '>=4'}
 
+  p-limit@6.2.0:
+    resolution: {integrity: sha512-kuUqqHNUqoIWp/c467RI4X6mmyuojY5jGutNU0wVTmEOOfcuwLqyMVoAi9MKi2Ak+5i9+nhmrK4ufZE8069kHA==}
+    engines: {node: '>=18'}
+
   p-queue@6.6.2:
     resolution: {integrity: sha512-RwFpb72c/BhQLEXIZ5K2e+AhgNVmIejGlTgiB9MzZ0e93GRvqZ7uSi0dvRF7/XIXDeNkra2fNHBxTyPDGySpjQ==}
     engines: {node: '>=8'}
@@ -1044,6 +1051,10 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  yocto-queue@1.2.1:
+    resolution: {integrity: sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==}
+    engines: {node: '>=12.20'}
 
   zod-to-json-schema@3.24.5:
     resolution: {integrity: sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==}
@@ -2295,6 +2306,10 @@ snapshots:
 
   p-finally@1.0.0: {}
 
+  p-limit@6.2.0:
+    dependencies:
+      yocto-queue: 1.2.1
+
   p-queue@6.6.2:
     dependencies:
       eventemitter3: 4.0.7
@@ -2432,6 +2447,8 @@ snapshots:
       webidl-conversions: 3.0.1
 
   wrappy@1.0.2: {}
+
+  yocto-queue@1.2.1: {}
 
   zod-to-json-schema@3.24.5(zod@3.25.57):
     dependencies:

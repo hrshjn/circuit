@@ -1,1 +1,11 @@
 screenshots/*.png filter=lfs diff=lfs merge=lfs -text
+
+# Treat these extensions as binary files, so they don't get diffed.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+
+# For traceability, but don't diff the contents of the DB.
+traces/ diff=bin
+flows.sqlite binary

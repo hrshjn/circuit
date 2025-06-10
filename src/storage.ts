@@ -126,6 +126,15 @@ export function getFlowSteps(name: string): { url: string; screenshot: string }[
 }
 
 /**
+ * Retrieves the names of all flows stored in the database.
+ *
+ * @returns An array of objects, each containing the name of a flow.
+ */
+export function getAllFlows(): { name: string }[] {
+  return db.prepare('SELECT name FROM flows').all() as { name: string }[];
+}
+
+/**
  * Retrieves the names of all flows that have been modified since the last documentation generation.
  *
  * @returns An array of flow names.

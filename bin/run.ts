@@ -16,9 +16,14 @@ function parseArgs(args: string[]) {
 
 async function main() {
   const { url, useGraph, headful, depth } = parseArgs(process.argv.slice(2));
+  const useLats = process.argv.slice(2).includes('--graph-lats');
 
   try {
-    if (useGraph) {
+    if (useLats) {
+      console.log(`Running LATS agent on ${url} (depth: ${depth}, headful: ${headful})`);
+      const { runGraphLats } = await import('../src/agent/graph');
+      await runGraphLats(url, depth);
+    } else if (useGraph) {
       console.log(`Running graph-based crawl on ${url} (depth: ${depth}, headful: ${headful})`);
       await runGraph(url, { maxDepth: depth, headless: !headful });
     } else {
