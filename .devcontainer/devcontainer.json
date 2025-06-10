@@ -1,0 +1,11 @@
+{
+  "name": "circuit-documenter",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/pnpm:latest": {}
+  },
+  "postCreateCommand": "pnpm install --frozen-lockfile && npx playwright install --with-deps",
+  "forwardPorts": [
+    9229
+  ]
+} 

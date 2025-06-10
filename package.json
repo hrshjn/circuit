@@ -1,0 +1,15 @@
+{
+  "name": "circuit-documenter",
+  "version": "1.0.0",
+  "description": "An auto-documentation crawler using Playwright and LangGraph.",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "build": "tsc",
+    "crawl": "ts-node src/main.ts",
+    "test": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+} 
