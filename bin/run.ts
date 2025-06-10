@@ -1,37 +1,34 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import { exec } from 'child_process';
+import { crawl } from '../src/crawl.js';
 import { runGraph } from '../src/graph.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+function parseArgs(args: string[]) {
+  const url = args.find(arg => arg.startsWith('http')) ?? 'https://example.com';
+  const useGraph = args.includes('--graph');
+  const headful = args.includes('--headful');
+  const depthArg = args.find(arg => arg.startsWith('--depth='));
+  const depth = depthArg ? parseInt(depthArg.split('=')[1], 10) : 3;
+  
+  return { url, useGraph, headful, depth };
+}
 
 async function main() {
-    const args = process.argv.slice(2);
-    const useGraph = args.includes('--graph');
-    const url = args.find(arg => arg.startsWith('http')) ?? 'https://example.com';
-    
-    const depthArg = args.find(arg => arg.startsWith('--depth='));
-    const depth = depthArg ? parseInt(depthArg.split('=')[1], 10) : undefined;
+  const { url, useGraph, headful, depth } = parseArgs(process.argv.slice(2));
 
+  try {
     if (useGraph) {
-        console.log('Running with LangGraph...');
-        await runGraph(url, depth);
+      console.log(`Running graph-based crawl on ${url} (depth: ${depth}, headful: ${headful})`);
+      await runGraph(url, { maxDepth: depth, headless: !headful });
     } else {
-        console.log('Running simple crawl...');
-        const crawlScriptPath = path.resolve(__dirname, '../src/crawl.ts');
-        const command = `tsx ${crawlScriptPath} ${url}`;
-        
-        const child = exec(command);
-        child.stdout?.pipe(process.stdout);
-        child.stderr?.pipe(process.stderr);
-
-        child.on('close', (code) => {
-            process.exit(code ?? 0);
-        });
+      console.log(`Running simple trace on ${url} (headful: ${headful})`);
+      await crawl(url, { headless: !headful });
     }
+    console.log('✅ Done.');
+  } catch (error) {
+    console.error('❌ Crawl failed:', error);
+    process.exit(1);
+  }
 }
 
 main(); 

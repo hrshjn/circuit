@@ -4,6 +4,7 @@
 
 # Environment
 .env
+flows.sqlite
 
 # Logs
 npm-debug.log*

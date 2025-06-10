@@ -29,6 +29,35 @@ Circuit Documenter is an automated web crawler that uses AI to generate document
     # => traces/trace-<timestamp>.zip
     ```
 
+## Running the crawler
+
+You can run the crawler in two modes:
+
+### One-off trace
+This captures a single Playwright trace for debugging.
+
+```bash
+pnpm crawl https://example.com
+```
+
+### Exploratory graph crawl
+This simulates a user exploring the application by clicking links.
+
+```bash
+# Crawl 5 levels deep with a visible browser
+pnpm crawl https://example.com --graph --depth=5 --headful
+```
+
+### Regenerate docs
+
+```bash
+# rebuild only one flow
+pnpm docs:regen "https://example.com"
+
+# rebuild all flows
+pnpm docs:regen
+```
+
 4.  **View the documentation:**
     The generated docs will be in the `/docs` directory.
 

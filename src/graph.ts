@@ -2,8 +2,11 @@ import { chromium } from '@playwright/test';
 
 export interface State { url: string; depth: number }
 
-export async function runGraph(startUrl: string, maxDepth = 3): Promise<void> {
-  const browser = await chromium.launch();
+export async function runGraph(
+  startUrl: string, 
+  { maxDepth = 3, headless = true } = {}
+): Promise<void> {
+  const browser = await chromium.launch({ headless });
   const context = await browser.newContext();
   const page    = await context.newPage();
 
