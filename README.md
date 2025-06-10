@@ -64,3 +64,32 @@ pnpm docs:regen
 ## Using Dev Containers
 
 This project is configured to run in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers). To get started, ensure you have Docker installed and running. Then, open the command palette and select `Dev Containers: Reopen in Container`. 
+
+## Production deployment
+
+### Environment Configuration
+
+For different environments like staging or production, create a `.env` file based on `.env.example`. You'll need to configure `LOGIN_URL`, `USERNAME`, and `PASSWORD` for automated authentication. For production, it's highly recommended to set up S3 off-loading by providing the `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` variables.
+
+### Authentication
+
+The crawler can authenticate using two methods:
+1.  **Saved Session**: If an `auth.json` file exists, it will be used to restore the browser session, including cookies and local storage.
+2.  **Environment Variables**: If `auth.json` is not found, the crawler will attempt to log in using the `LOGIN_URL`, `USERNAME`, and `PASSWORD` variables from your `.env` file. After a successful login, it will create `auth.json` for subsequent runs.
+
+To clear a saved session and force a new login, run:
+```bash
+pnpm auth:reset
+```
+
+### Sharded Crawling
+
+For very large websites, you can parallelize the crawling process across multiple machines or containers using Playwright's sharding feature. The `--shard` flag allows you to split the list of URLs to crawl into a number of shards and run only a specific one.
+
+For example, to split the crawl into 5 shards and run the first one (index 0):
+```bash
+pnpm crawl --shard=1/5
+```
+You would then run commands for `2/5`, `3/5`, etc. on different machines.
+
+This is useful for ensuring that visual changes are intentional and for catching regressions in the UI.

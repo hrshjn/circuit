@@ -1,32 +1,51 @@
 import { chromium } from '@playwright/test';
+import * as storage from './storage';
+import path from 'path';
+import fs from 'fs';
 
-export interface State { url: string; depth: number }
+storage.init();
+
+export interface State {
+  url: string;
+  depth: number;
+}
 
 export async function runGraph(
-  startUrl: string, 
-  { maxDepth = 3, headless = true } = {}
+  startUrl: string,
+  { maxDepth = 3, headless = true } = {},
 ): Promise<void> {
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext();
-  const page    = await context.newPage();
+  const page = await context.newPage();
 
   let depth = 0;
-  let current = startUrl;
+  let currentUrl = startUrl;
+  const flowName = `graph-${new URL(startUrl).hostname}`;
+
+  const screenshotsDir = 'screenshots';
+  if (!fs.existsSync(screenshotsDir)) {
+    fs.mkdirSync(screenshotsDir);
+  }
 
   while (depth < maxDepth) {
-    await page.goto(current, { waitUntil: 'domcontentloaded' });
+    await page.goto(currentUrl, { waitUntil: 'domcontentloaded' });
 
-    // take a screenshot so later phases have an artefact
-    await page.screenshot({ path: `traces/step-${depth}.png` });
+    const screenshotPath = `${screenshotsDir}/${flowName}-step-${depth}.png`;
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+    await storage.addStep(flowName, {
+      url: currentUrl,
+      screenshot: screenshotPath,
+    });
 
-    const next = await page.evaluate(() => {
+    const nextUrl = await page.evaluate(() => {
       const a = document.querySelector<HTMLAnchorElement>('a[href]');
       return a ? a.href : null;
     });
-    if (!next) break;
 
-    current = next;
-    depth  += 1;
+    if (!nextUrl || nextUrl === currentUrl) break;
+
+    currentUrl = nextUrl;
+    depth += 1;
   }
 
   await browser.close();

@@ -1,60 +1,46 @@
 import { chromium } from '@playwright/test';
 import fs from 'fs';
-import path from 'path';
-import { upsertStep } from './storage.js';
+import { addStep, init } from './storage';
+import { injectAuth } from './auth';
 
-const AUTH_FILE = 'auth.json';
-const TRACES_DIR = path.resolve(process.cwd(), 'traces');
+init();
 
-export async function crawl(url: string, { headless } = { headless: true }) {
-  console.log(`Starting crawl of: ${url}`);
+type CrawlOptions = {
+  headless?: boolean;
+};
 
-  const browser = await chromium.launch({ headless });
-  const context = await browser.newContext({
-    storageState: fs.existsSync(AUTH_FILE) ? AUTH_FILE : undefined,
-  });
+/**
+ * Crawls a single URL, takes a screenshot, and stores it as a step in a flow.
+ * It handles authentication and applies any configured URL variants.
+ *
+ * @param name The name of the flow.
+ * @param url The URL to crawl.
+ * @param options Optional settings for the crawl, like headless mode.
+ */
+export async function crawl(
+  name: string,
+  url: string,
+  options?: CrawlOptions,
+) {
+  const browser = await chromium.launch({ headless: options?.headless });
+  // Pass storageState to load cookies and other session data.
+  const context = await browser.newContext({ storageState: 'auth.json' });
+
+  // injectAuth will log in and create auth.json if it's missing.
+  await injectAuth(context);
 
   const page = await context.newPage();
-  let navigationFailed = false;
+  const variant = process.env.FORCE_VARIANT || '';
+  await page.goto(url + variant);
 
-  try {
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-    if (!response || !response.ok()) {
-      console.error(`Navigation failed with status: ${response?.status()}`);
-      navigationFailed = true;
-    } else {
-      await page.waitForLoadState('networkidle');
-
-      const depth = 0; // Simple crawl is always at depth 0
-      const screenshotPath = `traces/step-${depth}.png`;
-      fs.mkdirSync(TRACES_DIR, { recursive: true });
-      await page.screenshot({ path: screenshotPath });
-
-      const dom = await page.content();
-      const outcome = upsertStep({
-        pathId: url, // For single-page crawl, pathId is the URL
-        seq: depth,
-        url: page.url(),
-        dom,
-        screenshot: screenshotPath,
-      });
-      console.info(`[storage] step ${depth}:`, outcome);
-    }
-  } catch (e) {
-    console.error(`Error during navigation:`, e);
-    navigationFailed = true;
-  } finally {
-    await context.close();
-    await browser.close();
-
-    if (navigationFailed) {
-      process.exitCode = 1;
-    }
+  const screenshotsDir = 'screenshots';
+  if (!fs.existsSync(screenshotsDir)) {
+    fs.mkdirSync(screenshotsDir);
   }
-}
+  const screenshotPath = `${screenshotsDir}/${name}-${Date.now()}.png`;
+  await page.screenshot({ path: screenshotPath, fullPage: true });
 
-// Allow direct execution
-if (process.argv[1] && (process.argv[1].endsWith('crawl.ts') || process.argv[1].endsWith('crawl.js'))) {
-  const url = process.argv[2] ?? 'https://example.com';
-  crawl(url);
-} 
+  await addStep(name, { url: page.url(), screenshot: screenshotPath });
+
+  await browser.close();
+}

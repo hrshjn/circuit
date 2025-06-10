@@ -8,16 +8,24 @@
     "dev": "tsx watch src/crawl.ts",
     "crawl": "tsx bin/run.ts",
     "build": "tsc -p .",
-    "test": "playwright test",
-    "docs:regen": "tsx bin/docs-regen.ts --all"
+    "test": "playwright test tests/unit.spec.ts",
+    "test:visual": "playwright test tests/visual.spec.ts",
+    "test:visual:update": "playwright test tests/visual.spec.ts --update-snapshots",
+    "ci:nightly": "pnpm crawl && pnpm docs:regen && pnpm ci:pr",
+    "auth:reset": "rm -f auth.json",
+    "docs:regen": "tsx bin/docs-regen.ts --all",
+    "docs:regen:changed": "tsx bin/docs-regen-diff.ts"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3"]
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.826.0",
     "@langchain/langgraph": "^0.3.1",
     "@langchain/openai": "^0.5.12",
     "@playwright/test": "^1.52.0",
