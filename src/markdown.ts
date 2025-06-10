@@ -1,27 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { ChatOpenAI } from '@langchain/openai';
-import Database from 'better-sqlite3';
+import { getFlowSteps } from './storage';
 
-const db = new Database('flows.sqlite');
 const llm = new ChatOpenAI({ modelName: 'gpt-4o-mini', temperature: 0.2 });
 
-interface StepRow {
-  seq: number;
-  url: string;
-  screenshot: string;
-}
-
-function getSteps(pathId: string): StepRow[] {
-  return db.prepare(
-    'SELECT seq, url, screenshot FROM steps WHERE pathId = ? ORDER BY seq'
-  ).all(pathId) as StepRow[];
-}
-
-export async function generateDoc(pathId: string): Promise<void> {
-  const steps = getSteps(pathId);
+export async function generateDoc(flowName: string): Promise<void> {
+  const steps = getFlowSteps(flowName);
   if (steps.length === 0) {
-    console.warn(`[markdown] no steps found for ${pathId}`);
+    console.warn(`[markdown] no steps found for ${flowName}`);
     return;
   }
 
@@ -30,25 +17,25 @@ export async function generateDoc(pathId: string): Promise<void> {
     {
       role: 'system',
       content:
-        'You are a technical writer. Produce a succinct step-by-step guide. Each step: "## Step n – Short title" then one-line description, then "![screenshot](<link>)". Keep it concise.'
+        'You are a technical writer. Produce a succinct step-by-step guide. Each step: "## Step n – Short title" then one-line description, then "![screenshot](<link>)". Keep it concise.',
     },
     {
       role: 'user',
       content: JSON.stringify(
-        steps.map(s => ({
-          step: s.seq + 1,
+        steps.map((s, i) => ({
+          step: i + 1,
           url: s.url,
-          screenshot: s.screenshot
+          screenshot: s.screenshot,
         })),
         null,
-        2
-      )
-    }
+        2,
+      ),
+    },
   ]);
 
   /* ---- write file ---- */
-  const outDir  = path.join('docs', 'flows');
-  const outPath = path.join(outDir, `${encodeURIComponent(pathId)}.md`);
+  const outDir = path.join('docs', 'flows');
+  const outPath = path.join(outDir, `${encodeURIComponent(flowName)}.md`);
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(outPath, outline.content.toString());
   console.info('[markdown] generated', outPath);

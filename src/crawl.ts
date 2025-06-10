@@ -23,15 +23,18 @@ export async function crawl(
   options?: CrawlOptions,
 ) {
   const browser = await chromium.launch({ headless: options?.headless });
-  // Pass storageState to load cookies and other session data.
-  const context = await browser.newContext({ storageState: 'auth.json' });
+  // Pass storageState only if the auth file exists.
+  const context = await browser.newContext({
+    storageState: fs.existsSync('auth.json') ? 'auth.json' : undefined,
+  });
 
   // injectAuth will log in and create auth.json if it's missing.
   await injectAuth(context);
 
   const page = await context.newPage();
   const variant = process.env.FORCE_VARIANT || '';
-  await page.goto(url + variant);
+  const fullUrl = url + variant;
+  await page.goto(fullUrl);
 
   const screenshotsDir = 'screenshots';
   if (!fs.existsSync(screenshotsDir)) {
@@ -40,7 +43,7 @@ export async function crawl(
   const screenshotPath = `${screenshotsDir}/${name}-${Date.now()}.png`;
   await page.screenshot({ path: screenshotPath, fullPage: true });
 
-  await addStep(name, { url: page.url(), screenshot: screenshotPath });
+  await addStep(name, { url: fullUrl, screenshot: screenshotPath });
 
   await browser.close();
 }

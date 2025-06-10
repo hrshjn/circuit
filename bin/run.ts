@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import { crawl } from '../src/crawl.js';
-import { runGraph } from '../src/graph.js';
+import { crawl } from '../src/crawl';
+import { runGraph } from '../src/graph';
+import { URL } from 'url';
 
 function parseArgs(args: string[]) {
   const url = args.find(arg => arg.startsWith('http')) ?? 'https://example.com';
@@ -22,7 +23,8 @@ async function main() {
       await runGraph(url, { maxDepth: depth, headless: !headful });
     } else {
       console.log(`Running simple trace on ${url} (headful: ${headful})`);
-      await crawl(url, { headless: !headful });
+      const flowName = new URL(url).hostname.replace(/\./g, '-');
+      await crawl(flowName, url, { headless: !headful });
     }
     console.log('✅ Done.');
   } catch (error) {
