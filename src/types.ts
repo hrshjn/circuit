@@ -23,4 +23,16 @@ export const EvaluationSchema = z.object({
   score: z.number(),
   notes: z.string(),
 });
-export type Evaluation = z.infer<typeof EvaluationSchema>; 
+export type Evaluation = z.infer<typeof EvaluationSchema>;
+
+export interface Command {
+  command: 'click' | 'fill' | 'go_to';
+  selector?: string;
+  value?: string;
+  url?: string;
+}
+
+export interface Step {
+  url: string;
+  commandLog: Command[];
+} 

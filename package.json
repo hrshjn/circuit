@@ -7,13 +7,16 @@
     "start": "pnpm crawl https://razorpay.com --graph --depth=3",
     "dev": "tsx watch src/crawl.ts",
     "crawl": "tsx -r dotenv/config bin/run.ts",
+    "crawl:fast": "LLM_PRUNE=on tsx -r dotenv/config bin/run.ts",
+    "get-context": "tsx bin/get-context.ts",
     "debug:env": "tsx -r dotenv/config -e 'console.log(`LOGIN_URL from env: ${process.env.LOGIN_URL}`)'",
     "build": "tsc -p .",
-    "test": "playwright test tests/unit.spec.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "test:visual": "playwright test tests/visual.spec.ts",
     "test:visual:update": "playwright test tests/visual.spec.ts --update-snapshots",
     "ci:nightly": "pnpm crawl && pnpm docs:regen && pnpm ci:pr",
     "auth:reset": "rm -f auth.json",
+    "docs:gen": "tsx bin/generate-docs.ts",
     "docs:regen": "tsx -r dotenv/config bin/docs-regen.ts",
     "docs:regen:changed": "tsx -r dotenv/config bin/docs-regen-diff.ts"
   },
@@ -31,7 +34,10 @@
     "@langchain/openai": "^0.5.12",
     "@playwright/test": "^1.52.0",
     "better-sqlite3": "^11.10.0",
+    "bottleneck": "^2.19.5",
     "dotenv": "^16.5.0",
+    "openai": "^5.3.0",
+    "p-limit": "^6.2.0",
     "zod": "^3.25.57"
   },
   "devDependencies": {

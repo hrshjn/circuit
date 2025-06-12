@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import { generateDoc } from '../src/markdown';
-import { getModifiedFlows, markAllFlowsAsDocumented } from '../src/storage';
+import {
+  getModifiedFlows,
+  markAllFlowsAsDocumented,
+  getAllFlows,
+} from '../src/storage';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -15,16 +19,13 @@ async function main() {
     flowsToDocument = [{ name: specificFlow }];
   } else if (changed) {
     flowsToDocument = getModifiedFlows();
-  } else if (all) {
-    // This is a placeholder, you'd need a `getAllFlows` in storage.ts
-    console.log(
-      '--all is not fully implemented yet, needs getAllFlows() in storage.',
-    );
-    return;
+  } else {
+    // Default to all flows if no specific flag is given
+    flowsToDocument = getAllFlows();
   }
 
   if (flowsToDocument.length === 0) {
-    console.log('No new or modified flows to document.');
+    console.log('No flows found to document.');
     return;
   }
 

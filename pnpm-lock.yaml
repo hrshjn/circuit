@@ -13,19 +13,28 @@ importers:
         version: 3.826.0
       '@langchain/langgraph':
         specifier: ^0.3.1
-        version: 0.3.1(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))(zod-to-json-schema@3.24.5(zod@3.25.57))
+        version: 0.3.1(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))(zod-to-json-schema@3.24.5(zod@3.25.57))
       '@langchain/openai':
         specifier: ^0.5.12
-        version: 0.5.12(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))
+        version: 0.5.12(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))
       '@playwright/test':
         specifier: ^1.52.0
         version: 1.52.0
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0
+      bottleneck:
+        specifier: ^2.19.5
+        version: 2.19.5
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
+      openai:
+        specifier: ^5.3.0
+        version: 5.3.0(zod@3.25.57)
+      p-limit:
+        specifier: ^6.2.0
+        version: 6.2.0
       zod:
         specifier: ^3.25.57
         version: 3.25.57
@@ -655,6 +664,9 @@ packages:
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
 
+  bottleneck@2.19.5:
+    resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
+
   bowser@2.11.0:
     resolution: {integrity: sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==}
 
@@ -909,9 +921,25 @@ packages:
       zod:
         optional: true
 
+  openai@5.3.0:
+    resolution: {integrity: sha512-VIKmoF7y4oJCDOwP/oHXGzM69+x0dpGFmN9QmYO+uPbLFOmmnwO+x1GbsgUtI+6oraxomGZ566Y421oYVu191w==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   p-finally@1.0.0:
     resolution: {integrity: sha512-LICb2p9CB7FS+0eR1oqWnHhp0FljGLZCWBE9aix0Uye9W8LTQPwMTYVGWQWIw9RdQiDg4+epXQODwIYJtSJaow==}
     engines: {node: '>=4'}
+
+  p-limit@6.2.0:
+    resolution: {integrity: sha512-kuUqqHNUqoIWp/c467RI4X6mmyuojY5jGutNU0wVTmEOOfcuwLqyMVoAi9MKi2Ak+5i9+nhmrK4ufZE8069kHA==}
+    engines: {node: '>=18'}
 
   p-queue@6.6.2:
     resolution: {integrity: sha512-RwFpb72c/BhQLEXIZ5K2e+AhgNVmIejGlTgiB9MzZ0e93GRvqZ7uSi0dvRF7/XIXDeNkra2fNHBxTyPDGySpjQ==}
@@ -1044,6 +1072,10 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  yocto-queue@1.2.1:
+    resolution: {integrity: sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==}
+    engines: {node: '>=12.20'}
 
   zod-to-json-schema@3.24.5:
     resolution: {integrity: sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==}
@@ -1595,14 +1627,14 @@ snapshots:
   '@esbuild/win32-x64@0.25.5':
     optional: true
 
-  '@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57))':
+  '@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.20
-      langsmith: 0.3.30(openai@4.104.0(zod@3.25.57))
+      langsmith: 0.3.30(openai@5.3.0(zod@3.25.57))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -1612,25 +1644,25 @@ snapshots:
     transitivePeerDependencies:
       - openai
 
-  '@langchain/langgraph-checkpoint@0.0.18(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))':
+  '@langchain/langgraph-checkpoint@0.0.18(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))':
     dependencies:
-      '@langchain/core': 0.3.57(openai@4.104.0(zod@3.25.57))
+      '@langchain/core': 0.3.57(openai@5.3.0(zod@3.25.57))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))':
+  '@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 0.3.57(openai@4.104.0(zod@3.25.57))
+      '@langchain/core': 0.3.57(openai@5.3.0(zod@3.25.57))
 
-  '@langchain/langgraph@0.3.1(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))(zod-to-json-schema@3.24.5(zod@3.25.57))':
+  '@langchain/langgraph@0.3.1(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))(zod-to-json-schema@3.24.5(zod@3.25.57))':
     dependencies:
-      '@langchain/core': 0.3.57(openai@4.104.0(zod@3.25.57))
-      '@langchain/langgraph-checkpoint': 0.0.18(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))
-      '@langchain/langgraph-sdk': 0.0.84(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))
+      '@langchain/core': 0.3.57(openai@5.3.0(zod@3.25.57))
+      '@langchain/langgraph-checkpoint': 0.0.18(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))
+      '@langchain/langgraph-sdk': 0.0.84(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))
       uuid: 10.0.0
       zod: 3.25.57
     optionalDependencies:
@@ -1638,9 +1670,9 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@langchain/openai@0.5.12(@langchain/core@0.3.57(openai@4.104.0(zod@3.25.57)))':
+  '@langchain/openai@0.5.12(@langchain/core@0.3.57(openai@5.3.0(zod@3.25.57)))':
     dependencies:
-      '@langchain/core': 0.3.57(openai@4.104.0(zod@3.25.57))
+      '@langchain/core': 0.3.57(openai@5.3.0(zod@3.25.57))
       js-tiktoken: 1.0.20
       openai: 4.104.0(zod@3.25.57)
       zod: 3.25.57
@@ -2042,6 +2074,8 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+  bottleneck@2.19.5: {}
+
   bowser@2.11.0: {}
 
   buffer@5.7.1:
@@ -2233,7 +2267,7 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
 
-  langsmith@0.3.30(openai@4.104.0(zod@3.25.57)):
+  langsmith@0.3.30(openai@5.3.0(zod@3.25.57)):
     dependencies:
       '@types/uuid': 10.0.0
       chalk: 4.1.2
@@ -2243,7 +2277,7 @@ snapshots:
       semver: 7.7.2
       uuid: 10.0.0
     optionalDependencies:
-      openai: 4.104.0(zod@3.25.57)
+      openai: 5.3.0(zod@3.25.57)
 
   math-intrinsics@1.1.0: {}
 
@@ -2293,7 +2327,15 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  openai@5.3.0(zod@3.25.57):
+    optionalDependencies:
+      zod: 3.25.57
+
   p-finally@1.0.0: {}
+
+  p-limit@6.2.0:
+    dependencies:
+      yocto-queue: 1.2.1
 
   p-queue@6.6.2:
     dependencies:
@@ -2432,6 +2474,8 @@ snapshots:
       webidl-conversions: 3.0.1
 
   wrappy@1.0.2: {}
+
+  yocto-queue@1.2.1: {}
 
   zod-to-json-schema@3.24.5(zod@3.25.57):
     dependencies:
