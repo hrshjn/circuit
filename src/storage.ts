@@ -1,4 +1,6 @@
 import Database from 'better-sqlite3';
+import { createHash } from 'crypto';
+import { Command, Step } from './types';
 import fs from 'fs';
 import path from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -58,9 +60,16 @@ export function init() {
       hash TEXT NOT NULL UNIQUE,
       url TEXT NOT NULL,
       screenshot TEXT NOT NULL,
+      commandLog TEXT,
       FOREIGN KEY (flow_id) REFERENCES flows(id)
     );
   `);
+  
+  // Add the commandLog column if it doesn't exist (for existing databases)
+  const columns = db.prepare("PRAGMA table_info(steps)").all() as Array<{name: string}>;
+  if (!columns.some(col => col.name === 'commandLog')) {
+    db.exec('ALTER TABLE steps ADD COLUMN commandLog TEXT');
+  }
 }
 
 /**
@@ -94,21 +103,27 @@ export async function addStep(
   step: {
     url: string;
     screenshot: string;
+    commandLog?: Command[];
   },
 ) {
   const screenshotUrl = await uploadIfS3(step.screenshot);
   const flowId = getFlowId(name);
-  const stepHash = sha1(JSON.stringify({ name, url: step.url }));
+  const stepHash = sha1(JSON.stringify({ 
+    name, 
+    url: step.url, 
+    commandLog: step.commandLog 
+  }));
 
   db.prepare(
-    `INSERT INTO steps (flow_id, hash, url, screenshot)
-     VALUES (@flowId, @hash, @url, @screenshot)
+    `INSERT INTO steps (flow_id, hash, url, screenshot, commandLog)
+     VALUES (@flowId, @hash, @url, @screenshot, @commandLog)
      ON CONFLICT(hash) DO NOTHING`,
   ).run({
     flowId,
     hash: stepHash,
     url: step.url,
     screenshot: screenshotUrl,
+    commandLog: step.commandLog ? JSON.stringify(step.commandLog) : null,
   });
 }
 
@@ -118,11 +133,21 @@ export async function addStep(
  * @param name The name of the flow.
  * @returns An array of step objects.
  */
-export function getFlowSteps(name: string): { url: string; screenshot: string }[] {
+export function getFlowSteps(name: string): { 
+  url: string; 
+  screenshot: string;
+  commandLog?: Command[];
+}[] {
   const flowId = getFlowId(name);
-  return db
-    .prepare('SELECT url, screenshot FROM steps WHERE flow_id = ?')
-    .all(flowId) as { url: string; screenshot: string }[];
+  const steps = db
+    .prepare('SELECT url, screenshot, commandLog FROM steps WHERE flow_id = ?')
+    .all(flowId) as { url: string; screenshot: string; commandLog: string | null }[];
+  
+  return steps.map(step => ({
+    url: step.url,
+    screenshot: step.screenshot,
+    commandLog: step.commandLog ? (JSON.parse(step.commandLog) as Command[]) : [],
+  }));
 }
 
 /**
@@ -159,3 +184,39 @@ export function getModifiedFlows(): { name: string }[] {
 export function markAllFlowsAsDocumented() {
   db.prepare(`UPDATE flows SET lastRun = datetime('now')`).run();
 }
+
+export async function writeStep(step: Step) {
+  const commandLogJson = JSON.stringify(step.commandLog);
+  const hash = createHash('sha256')
+    .update(step.url + commandLogJson)
+    .digest('hex');
+
+  const stmt = db.prepare(
+    'INSERT OR REPLACE INTO steps (hash, url, command_log) VALUES (?, ?, ?)',
+  );
+  stmt.run(hash, step.url, commandLogJson);
+  console.log(`[STORAGE] Wrote step for URL: ${step.url}`);
+}
+
+export async function readSteps(): Promise<Step[]> {
+  const stmt = db.prepare('SELECT url, command_log FROM steps ORDER BY timestamp ASC');
+  const rows = stmt.all() as any[];
+  return rows.map(row => ({
+    url: row.url,
+    commandLog: JSON.parse(row.command_log),
+  }));
+}
+
+// Keeping legacy functions for now to prevent widespread errors.
+export function getFlow(flowId: string) {
+  return db.prepare('SELECT * FROM flows WHERE id = ?').get(flowId);
+}
+export function upsertFlow(flowId: string, startUrl: string) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO flows (id, startUrl) VALUES (?, ?)');
+    stmt.run(flowId, startUrl);
+}
+export function recordRun(flowId: string) {
+    db.prepare(`UPDATE flows SET lastRun = datetime('now')`).run();
+}
+
+export { Command, Step };

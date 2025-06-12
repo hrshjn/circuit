@@ -25,7 +25,15 @@ pnpm-debug.log*
 /playwright/.cache/
 trace-*.zip
 
-# Playwright
-/test-results/
-/playwright-report/
-/playwright/.cache/ 
+# Test artifacts
+test-results/
+playwright-report/
+traces/
+traces/video/
+
+# Database
+crawl.db
+llm-cache.db
+
+# Contexts (can be regenerated)
+contexts/ 
